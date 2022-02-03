@@ -1,3 +1,43 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:9aeefb67885a31e90afe519517b7b97faa6596c9ca391b6ca5e4fd27f305d240
-size 24
+# Tanks.IO
+Reinforcement learning using [ML-Agents](https://github.com/Unity-Technologies/ml-agents) curriculum learning.
+# [Environment](https://github.com/AGAPIA/BTreeGeneticFramework) provided by [Prof. Dr. Ciprian Paduraru](https://github.com/paduraru2009)
+# [Demo](https://youtu.be/jwQ1AVrMfNE)
+## Members of the team
+* [Victor Andrei Cociobanu](https://github.com/Vikcoc)
+* [Andrei Eduard Constantinescu](https://github.com/andreiec)
+* [Bogdan Andrei Baias](https://github.com/AndreiBaias)
+## Project description
+The goal of this project was to teach an agent to navigate through the game environment and collect a goal box. To achieve this goal we have used curriculum learning and other ML-Agents Toolkit resources. We have implemented multiple environments and trained multiple versions of the agent. Some of the "brains" generated have been used to train future agents.
+### Definitions
+* agent = The game object that was trained, in this particular instance a tank
+* bounds = The four sided game object that contained the movement of the agent
+* goal = The game object that the agent had to reach/collect
+* target = The game object that the agent had to shoot 
+### Lessons
+1. Both the agent and the goal spawn at set positions inside rectangular bounds. As the lessons increase in number, the agent is spawned further and further away from the goal and the bounds are enlarged, thus the agent having more room to explore. 
+2. The environment is the same as the one for the first lesson, only this time both the agent and the goal have random spawn points inside the bounds.
+3. Bounds are now square and their size is generated based on the lesson value. The agent and the goal have random spawn points inside the bounds based on the center of the bounds and a radius generated using the lesson number.
+4. Bounds are no longer generated, they consist of the game environment walls; this will not change until the end. Both the agent and the goal spawn randomly.
+5. The agent spawns at spawn points already defined in the original project; this will not change until the end. The goal spawns randomly.
+6. Introducing all the environment objects. The goal now checks if the spawn position is valid before spawning. 
+7. Training the agent to shoot the target. The game environment is empty, the agent and the target spawn at set positions at first, and then the tank spawns at set Spaw Points and the target spawns anywhere in the environment.
+### Behavior Parameters, Sensors and Config.yaml file 
+##### *This section could have as well been named "Human agent training"*
+The main issues encountered during the training of the agents were the fine tuning of variables and parameters and the human errors that lead to many training failures, thus increasing the time required to train the agent. 
+* Because the original environment defined the movement of the to be agent for both mouse+keyboard and controllers, the first few dozen training runs used continuous Vector Action Space Type with two branches, one for advancing and one for rotating as follows: vertical axis input means movement speed and direction, horizontal axis input means rotation speed and direction.  Upon observing the behavior of the agent using inference, the conclusion was that the continuous actions gravely hindered the ability of the agent to reach the goal, almost redering the agent unmovable. The actions were change to discrete with two branches, each of size 3: 0 means no action required, 1 means positive input on the coresponding axis, 2 means negative input on the coresponding axis. Heuristics were based on the same logic.
+* Number of max steps was originally set from the Unity interface as 5000, but after a few models trained it was clear that there was a need to give the agent a negative reward for taking too many steps, otherwise it would just learn to constantly spin around. This limitation was set to more than 4500 steps with a reward of -1.2. For the sixth lesson this value was changed to 20k steps, as the high number of game environment objects indroduced required a training setup more focused on curiosity and exploration of the environment to find the potentially hidden goal.
+* The sensors used to train the agent were related to the agent's position, rotation, orientation and position of the goal, respectively relative position of the agent and goal. Aditionally, 3D Ray Perception Sensors were used to make the agent "see" the goal, the bounds and the game environment objects. These sensors were the ones dictating the Vector Action Space Size, as follows : size = 3 * numOfVector3 + 4 * numOfQuaternions + (2 * RaysPerDirection + 1) * (numDetectableTags + 2). For the first five lessons, the size was 16 ( 2 tags, 2 rays per direction, ray length 20, sensors from code), for the last lesson it was 71(3 tags, 5 rays per direction, ray length 50, sensors from code).
+*  Trainer type used is PPO. Hyperparameters fall within a wide range generated by human trial and error of fine tuning and different ML-Agents version documentations and questions answered by the ML-Agents authors and devs on github/unity forums. The batch size was a power of two in range [32, 2048], the buffer size was either 10240 or 20480, the learning rate was tipically 0.0003 but in some cases values like 0.0001, 0.0005 and 0.001 were used for testing purposes. The most noticeable impact of the learning rate was seen during the sixth lesson, where we used the value 0.001 to teach the agent to not collide with the game environment objects. This has sped up the learning process considerably, estimating that with the default learning rate and the same values for all other hyperparameters would have taken at least ten times more training time. For a time we have tried using a constant learning rate schedule, but after noticing that it actually made the learning process worse, the agent scoring overall lower mean rewards and higher reward stds, we reverted back to the linear schedule. All other hyperparameters not mentioned remained constant to their default values throughout the training process.
+*  For the neural network the number of layers was either 2 or 3, and the number of hidden units ranged from 16 to 256. We settled on a number of hidden units equal to the size of the Vector Action Space + 1. The only noticeable differences were that too few hidden units resulted in worse results and too many hidden units compared to the Vector Action Space Size resulted in little progress over time. 
+*  The extrinsic reward was always set to strength 1 and gamma 1, while the curiosity module reward had a strength ranging from 0.0001 to 0.9 for testing purposes and a gamma ranging from 0.7 to 1. For the first five lessons, a strength of 0.005 was enough for our purpose, and for the last lesson the strength used was 0.5 to incentivise explorind the environment while looking for the goal. The learning rate for the extrinsic reward was 0.0001. 
+*  Even though the lessons had different numbers of curriculum lessons passed in the .yaml file, these lessons had a minimum length of a couple of hundreds, their values were usually used for spawning the agent the goal and the bounds accordingly to the lesson's desired complexity, the measure was always set to reward, for all the lessons except the third one the reward threshold was gradually increased, whilst for the aformentioned one the threshold was set to 0.8 to incentivise the training in multiple random environments.
+## Project utility
+This project can be integrated in a greater research topic regarding the efficiency of different Reinforcement Learning algorithms on training this specific agent in this specific environment compared to the efficiency of the default behavior tree algorithm which the agent's default behavior is based on.
+## Conclusions 
+Curriculum learning is a very specific, very finnicky training technique with great flexibility and amazing results if used properly. The goal of this project has been reached, the agent being successfully trained to collect a box, behavior which is also present in the behavior tree and a very important part of the game used in the form of shield, health, upgrade and ammo boxes and also simple pathfinding towards a certain position. Despite the previous statement, the agent is not fully ready to be used as an in-game AI because it lacks the training to prioritise one type of box over the other in respect to concrete game environment situations and the ability to shoot an enemy.
+## Further developments
+The most obvious improvements to this AI are to teach the agent to shoot (already started training) and then to prioritise fighting an enemy or picking up a box depending on the environment. Another possible development is to also train the agent against another similar agent. Finally, of course the agent is not perfect and could be further trained.
+##### __ACCIDENTAL DESIRED BEHAVIOR__
+The agent usually turns around before picking up the goal thus allowing it to remain aware of it's surroundings. Very useful in a combat scenario
+
+
