@@ -19,8 +19,10 @@ The goal of this project was to teach an agent to navigate through the game envi
 3. Bounds are now square and their size is generated based on the lesson value. The agent and the goal have random spawn points inside the bounds based on the center of the bounds and a radius generated using the lesson number.
 4. Bounds are no longer generated, they consist of the game environment walls; this will not change until the end. Both the agent and the goal spawn randomly.
 5. The agent spawns at spawn points already defined in the original project; this will not change until the end. The goal spawns randomly.
-6. Introducing all the environment objects. The goal now checks if the spawn position is valid before spawning. 
-7. Training the agent to shoot the target. The game environment is empty, the agent and the target spawn at set positions at first, and then the tank spawns at set Spaw Points and the target spawns anywhere in the environment.
+6. Introducing all the environment objects. The goal now checks if the spawn position is valid before spawning.
+##### Lessons for further development (marked with strikethrough as to not be confused with the lessons needed to achieve the goal of the project) 
+~~7. Training the agent to shoot the target. The game environment is empty, the agent and the target spawn at set positions at first, and then the tank spawns at set Spaw Points and the target spawns anywhere in the environment.~~
+~~8. Combining the behaviours to obtain an agent ready to play the game.~~
 ### Behavior Parameters, Sensors and Config.yaml file 
 ##### *This section could have as well been named "Human agent training"*
 The main issues encountered during the training of the agents were the fine tuning of variables and parameters and the human errors that lead to many training failures, thus increasing the time required to train the agent. 
